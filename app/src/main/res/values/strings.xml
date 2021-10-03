@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">E Wybory</string>
+    <string name="welcome_text">Witaj w aplikacji E-Wybory</string>
+    <string name="choose_auth_method_text">Wybierz metode uwierzytelnienia</string>
 </resources>

@@ -7,4 +7,6 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="edo_app_red">#c81224</color>
+    <color name="profil_zaufany_blue">#00255e</color>
 </resources>
