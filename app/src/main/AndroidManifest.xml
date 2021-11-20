@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="pl.edu.pjwstk.ewybory">
 
+    <uses-permission android:name="android.permission.NFC" />
+
+    <uses-feature android:name="android.hardware.nfc" />
+
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,6 +14,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.EWybory">
+        <activity android:name=".EdoAppAuthActivity"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.nfc.action.TECH_DISCOVERED" />
+            </intent-filter>
+
+        </activity>
         <activity android:name=".AuthorizationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

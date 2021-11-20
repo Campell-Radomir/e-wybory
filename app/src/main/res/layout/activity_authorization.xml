@@ -40,6 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="36dp"
         android:layout_marginTop="104dp"
+        android:onClick="edoAppButtonClickHandler"
         app:backgroundTint="@color/edo_app_red"
         app:icon="@mipmap/ic_edo_app_logo_round"
         app:layout_constraintStart_toStartOf="parent"
