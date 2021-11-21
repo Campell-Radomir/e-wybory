@@ -2,4 +2,25 @@
     <string name="app_name">E Wybory</string>
     <string name="welcome_text">Witaj w aplikacji E-Wybory</string>
     <string name="choose_auth_method_text">Wybierz metode uwierzytelnienia</string>
+    <string name="edo_nfc_started">Rozpoczęto komunikacje NFC</string>
+    <string name="edo_nfc_pace_started">Rozpoczęto uwierzytelnienie PACE</string>
+    <string name="edo_nfc_dg1_started">Uwierzytelnienie pomyślne, pobieranie danych</string>
+    <string name="edo_nfc_dg2_started">Pobieranie zdjęcia</string>
+    <string name="edo_nfc_error_pace">Błąd podczas uwierzytelnienia PACE, próba uwierzytelnienia BAC</string>
+    <string name="edo_nfc_error_bac">Błąd podczas uwierzytelnienia BAC, kończę proces</string>
+    <string name="result_first_name_label">Imię</string>
+    <string name="result_last_name_label">Nazwisko</string>
+    <string name="result_nationality_label">Narodowość</string>
+    <string name="result_gender_label">Płeć</string>
+    <string name="result_birth_date_label">Data urodzenia</string>
+    <string name="intent_first_name">FirstName</string>
+    <string name="intent_last_name">LastName</string>
+    <string name="intent_nationality">Nationality</string>
+    <string name="intent_gender">Gender</string>
+    <string name="intent_birth_date">BirthDate</string>
+    <string name="result_empty_data_text">Brak danych</string>
+    <string name="edo_document_number_label">Numer dowodu</string>
+    <string name="edo_date_of_birth_label">Data urodzenia (YYMMDD)</string>
+    <string name="edo_expiration_date_label">Data ważności dokumentu (YYMMDD)</string>
+    <string name="edo_download_complete_toast">Możesz odłożyć e-Dowód</string>
 </resources>

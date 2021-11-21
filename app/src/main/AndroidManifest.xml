@@ -6,7 +6,6 @@
 
     <uses-feature android:name="android.hardware.nfc" />
 
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -14,12 +13,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.EWybory">
-        <activity android:name=".EdoAppAuthActivity"
-            android:launchMode="singleTop">
+        <activity android:name=".EdoResultActivity"
+            android:parentActivityName=".AuthorizationActivity"></activity>
+        <activity
+            android:name=".EdoAppAuthActivity"
+            android:launchMode="singleTop"
+            android:parentActivityName=".AuthorizationActivity">
             <intent-filter>
                 <action android:name="android.nfc.action.TECH_DISCOVERED" />
             </intent-filter>
-
         </activity>
         <activity android:name=".AuthorizationActivity">
             <intent-filter>
