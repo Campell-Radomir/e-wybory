@@ -21,11 +21,12 @@ class EdoResultActivity : AppCompatActivity() {
         binding.lastNameText.text = getStringOrDefault(getString(R.string.intent_last_name))
         binding.birthDateText.text = formatDate(getStringOrDefault(getString(R.string.intent_birth_date)))
         binding.nationalityText.text = getStringOrDefault(getString(R.string.intent_nationality))
-        binding.genderText.text = getStringOrDefault(getString(R.string.intent_gender))
+        binding.personalNumberText.text = getStringOrDefault(getString(R.string.intent_personal_number))
+
     }
 
     private fun formatDate(date: String): CharSequence? {
-        return SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(SimpleDateFormat("yyMMdd", Locale.getDefault()).parse(date))
+        return SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(SimpleDateFormat("yyyyMMdd", Locale.getDefault()).parse(date))
     }
 
     private fun getStringOrDefault(extraName: String): String {

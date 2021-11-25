@@ -13,20 +13,17 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NavUtils
-import androidx.core.widget.addTextChangedListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.sf.scuba.smartcards.CardService
-import org.jmrtd.BACKey
-import org.jmrtd.BACKeySpec
-import org.jmrtd.PassportService
+import org.jmrtd.*
 import org.jmrtd.PassportService.NORMAL_MAX_TRANCEIVE_LENGTH
 import org.jmrtd.lds.CardAccessFile
 import org.jmrtd.lds.PACEInfo
+import org.jmrtd.lds.icao.DG11File
 import org.jmrtd.lds.icao.DG1File
-import org.jmrtd.lds.icao.MRZInfo
+import org.jmrtd.lds.icao.DG2File
 import org.spongycastle.jce.provider.BouncyCastleProvider
 import pl.edu.pjwstk.ewybory.databinding.ActivityEdoAppAuthBinding
 import java.security.Security
@@ -41,6 +38,7 @@ class EdoAppAuthActivity : AppCompatActivity() {
     private var documentNumber = ""
     private var birthDate = ""
     private var expirationDate = ""
+    private var can = ""
     private lateinit var binding: ActivityEdoAppAuthBinding;
 
 
@@ -84,6 +82,11 @@ class EdoAppAuthActivity : AppCompatActivity() {
                 Log.i(TAG, "Creating BACKey $bacKey")
                 enableLoadingView()
                 readDocument(IsoDep.get(tag), bacKey)
+            } else if(!can.isNullOrBlank()) {
+                val canKey = PACEKeySpec.createCANKey(can)
+                Log.i(TAG, "Creating PACE Can key $canKey")
+                enableLoadingView()
+                readDocument(IsoDep.get(tag), canKey)
             } else {
                 Toast.makeText(this, "Brak danych niezbędnych do odczytu E-dowodu", Toast.LENGTH_SHORT).show()
             }
@@ -91,7 +94,7 @@ class EdoAppAuthActivity : AppCompatActivity() {
     }
 
 
-    private fun readDocument(isoDep: IsoDep, bacKey: BACKeySpec) {
+    private fun readDocument(isoDep: IsoDep, key: AccessKeySpec) {
         CoroutineScope(Dispatchers.IO).launch {
             isoDep.timeout = NFC_TIMEOUT
             val cardService = CardService.getInstance(isoDep)
@@ -102,31 +105,48 @@ class EdoAppAuthActivity : AppCompatActivity() {
                val cardAccessFile = CardAccessFile(passportService.getInputStream(PassportService.EF_CARD_ACCESS))
                 for (securityInfo in cardAccessFile.securityInfos) {
                     if (securityInfo is PACEInfo) {
-                        authorizeWithPACE(passportService, bacKey, securityInfo)
+                        authorizeWithPACE(passportService, key, securityInfo)
                         paceSucceeded = true
                     }
                 }
             } catch (e: Exception) {
                 Log.w(TAG, e)
                 updateLoadingWithText(R.string.edo_nfc_error_pace)
+                return@launch
             }
 
             passportService.sendSelectApplet(paceSucceeded)
-            if (!paceSucceeded) {
-                authorizeWithBAC(passportService, bacKey)
-            }
+//            if (!paceSucceeded) {
+//                authorizeWithBAC(passportService, bacKey)
+//            }
             Log.i(TAG, "Accessing DG1 data")
             updateLoadingWithText(R.string.edo_nfc_dg1_started)
-//            todo metodka na odczyt danych
-            val dg1In = passportService.getInputStream(PassportService.EF_DG1)
-            val mrzInfo = DG1File(dg1In).mrzInfo
-            showMrzInfo(mrzInfo)
+            val dg1 = getDataGroup1FromDocument(passportService)
+            Log.i(TAG, "Accessing DG11 data")
+            val dg11 = getDataGroup11FromDocument(passportService)
+            showResult(dg1, dg11)
 
         }
     }
 
-    private fun authorizeWithPACE(passportService: PassportService, bacKey: BACKeySpec, securityInfo: PACEInfo) {
+    private fun getDataGroup1FromDocument(passportService: PassportService): DG1File {
+        val dataGroup = passportService.getInputStream(PassportService.EF_DG1)
+        return DG1File(dataGroup)
+    }
+
+    private fun getDataGroup2FromDocument(passportService: PassportService): DG2File {
+        val dataGroup = passportService.getInputStream(PassportService.EF_DG2)
+        return DG2File(dataGroup)
+    }
+
+    private fun getDataGroup11FromDocument(passportService: PassportService): DG11File {
+        val dataGroup = passportService.getInputStream(PassportService.EF_DG11)
+        return DG11File(dataGroup)
+    }
+
+    private fun authorizeWithPACE(passportService: PassportService, bacKey: AccessKeySpec, securityInfo: PACEInfo) {
         updateLoadingWithText(R.string.edo_nfc_pace_started)
+        //PACEKeySpec.createCANKey(can)
         val paceResult = passportService.doPACE(
                 bacKey,
                 securityInfo.objectIdentifier,
@@ -137,21 +157,22 @@ class EdoAppAuthActivity : AppCompatActivity() {
         updateLoadingWithText(R.string.edo_nfc_dg1_started)
     }
 
-    private fun authorizeWithBAC(passportService: PassportService, bacKey: BACKeySpec) {
-        try {
-            passportService.doBAC(bacKey)
-        } catch (e: Exception) {
-            Log.w(TAG, e)
-            disableLoadingView()
-            CoroutineScope(Dispatchers.Main).launch {
-                Toast.makeText(this@EdoAppAuthActivity, R.string.edo_nfc_error_bac, Toast.LENGTH_LONG).show()
-                NavUtils.navigateUpFromSameTask(this@EdoAppAuthActivity)
+//    private fun authorizeWithBAC(passportService: PassportService, bacKey: BACKeySpec) {
+//        try {
+//            passportService.doBAC(bacKey)
+//        } catch (e: Exception) {
+//            Log.w(TAG, e)
+//            disableLoadingView()
+//            CoroutineScope(Dispatchers.Main).launch {
+//                Toast.makeText(this@EdoAppAuthActivity, R.string.edo_nfc_error_bac, Toast.LENGTH_LONG).show()
+//                NavUtils.navigateUpFromSameTask(this@EdoAppAuthActivity)
+//
+//            }
+//        }
+//    }
 
-            }
-        }
-    }
-
-    private fun showMrzInfo(mrzInfo: MRZInfo) {
+    private fun showResult(dg1: DG1File, dg11: DG11File) {
+        val mrzInfo = dg1.mrzInfo
         disableLoadingView()
         Log.i(TAG, "MRZInfo: $mrzInfo")
         Log.i(TAG, "Primary " + mrzInfo.primaryIdentifier)
@@ -159,16 +180,17 @@ class EdoAppAuthActivity : AppCompatActivity() {
         Log.i(TAG, "BirthDate " + mrzInfo.dateOfBirth)
         Log.i(TAG, "Nationality " + mrzInfo.nationality)
         Log.i(TAG, "ISS " + mrzInfo.issuingState)
-
+        //todo dodać zdjęcie
 
         CoroutineScope(Dispatchers.Main).launch {
             Toast.makeText(this@EdoAppAuthActivity, getString(R.string.edo_download_complete_toast), Toast.LENGTH_SHORT).show()
             val resultIntent = Intent(baseContext, EdoResultActivity::class.java)
             resultIntent.putExtra(getString(R.string.intent_first_name), mrzInfo.secondaryIdentifier.replace("<", ""))
             resultIntent.putExtra(getString(R.string.intent_last_name), mrzInfo.primaryIdentifier.replace("<", ""))
-            resultIntent.putExtra(getString(R.string.intent_birth_date), mrzInfo.dateOfBirth.replace("<", ""))
+            resultIntent.putExtra(getString(R.string.intent_birth_date), dg11.fullDateOfBirth.replace("<", ""))
             resultIntent.putExtra(getString(R.string.intent_nationality), mrzInfo.nationality.replace("<", ""))
             resultIntent.putExtra(getString(R.string.intent_gender), mrzInfo.gender.name)
+            resultIntent.putExtra(getString(R.string.intent_personal_number), dg11.personalNumber.replace("<", ""))
             resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             baseContext.startActivity(resultIntent)
         }
@@ -179,9 +201,6 @@ class EdoAppAuthActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.Main).launch {
             binding.loadingText.text = getString(R.string.edo_nfc_started)
             binding.loadingText.visibility = View.VISIBLE
-//        val animation = ProgressBarAnimation(binding.loadingImage, 0f, 100f)
-//        animation.duration = NFC_TIMEOUT.toLong()
-//        binding.loadingImage.startAnimation(animation)
             ObjectAnimator.ofInt(binding.loadingImage, "progress", 10,25,50,75,100)
                 .setDuration(NFC_TIMEOUT.toLong())
                 .start()
