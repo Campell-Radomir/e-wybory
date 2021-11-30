@@ -7,49 +7,61 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.google.android.material.tabs.TabLayout
+import androidx.viewpager.widget.ViewPager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.sf.scuba.smartcards.CardService
 import org.jmrtd.*
-import org.jmrtd.PassportService.NORMAL_MAX_TRANCEIVE_LENGTH
 import org.jmrtd.lds.CardAccessFile
 import org.jmrtd.lds.PACEInfo
 import org.jmrtd.lds.icao.DG11File
 import org.jmrtd.lds.icao.DG1File
 import org.jmrtd.lds.icao.DG2File
 import org.spongycastle.jce.provider.BouncyCastleProvider
-import pl.edu.pjwstk.ewybory.databinding.ActivityEdoAppAuthBinding
+import pl.edu.pjwstk.ewybory.databinding.ActivityEdoAuthBinding
+import pl.edu.pjwstk.ewybory.ui.edo.EdoCanViewModel
+import pl.edu.pjwstk.ewybory.ui.edo.EdoDocumentViewModel
+import pl.edu.pjwstk.ewybory.ui.edo.SectionsPagerAdapter
 import java.security.Security
 
-
-class EdoAppAuthActivity : AppCompatActivity() {
+class EdoAuthActivity : AppCompatActivity() {
 
     private val NFC_TIMEOUT = 10 * 1000
 
-    private val TAG: String = EdoAppAuthActivity::class.java.simpleName
+    private val TAG: String = PassportAuthActivity::class.java.simpleName
     private lateinit var nfcAdapter: NfcAdapter
     private var documentNumber = ""
     private var birthDate = ""
     private var expirationDate = ""
     private var can = ""
-    private lateinit var binding: ActivityEdoAppAuthBinding;
-
-
+    private lateinit var binding: ActivityEdoAuthBinding
+    private lateinit var canViewModel: EdoCanViewModel
+    private lateinit var documentViewModel: EdoDocumentViewModel
+    private lateinit var viewPager: ViewPager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityEdoAppAuthBinding.inflate(layoutInflater)
+        binding = ActivityEdoAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
+        viewPager = binding.viewPager
+        viewPager.adapter = sectionsPagerAdapter
+        val tabs: TabLayout = binding.tabs
+        tabs.setupWithViewPager(viewPager)
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         Security.insertProviderAt(BouncyCastleProvider(), 1)
-        addEditTextListeners()
+        canViewModel = ViewModelProvider(this).get(EdoCanViewModel::class.java)
+        documentViewModel = ViewModelProvider(this).get(EdoDocumentViewModel::class.java)
+        Log.i(TAG, "Current item ${viewPager.currentItem}")
+        addViewModelsListeners()
     }
 
     override fun onResume() {
@@ -74,35 +86,32 @@ class EdoAppAuthActivity : AppCompatActivity() {
     private fun handleNfcIntent(intent: Intent) {
         val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
         if (tag?.techList?.contains("android.nfc.tech.IsoDep")!!) {
-            if (!documentNumber.isNullOrBlank()
-                    && !expirationDate.isNullOrBlank()
-                    && !birthDate.isNullOrBlank()
+            if (isDocumentFragmentVisible() && isDocumentDataPrepared()
             ) {
                 val bacKey: BACKeySpec = BACKey(documentNumber, birthDate, expirationDate)
                 Log.i(TAG, "Creating BACKey $bacKey")
                 enableLoadingView()
                 readDocument(IsoDep.get(tag), bacKey)
-            } else if(!can.isNullOrBlank()) {
+            } else if(isCanFragmentVisible() && isCanDataPrepared()) {
                 val canKey = PACEKeySpec.createCANKey(can)
                 Log.i(TAG, "Creating PACE Can key $canKey")
                 enableLoadingView()
                 readDocument(IsoDep.get(tag), canKey)
             } else {
-                Toast.makeText(this, "Brak danych niezbędnych do odczytu E-dowodu", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.error_not_enough_data_for_authentication), Toast.LENGTH_SHORT).show()
             }
         }
     }
-
 
     private fun readDocument(isoDep: IsoDep, key: AccessKeySpec) {
         CoroutineScope(Dispatchers.IO).launch {
             isoDep.timeout = NFC_TIMEOUT
             val cardService = CardService.getInstance(isoDep)
-            val passportService = PassportService(cardService, NORMAL_MAX_TRANCEIVE_LENGTH, DEFAULT_BUFFER_SIZE, true, false)
+            val passportService = PassportService(cardService, PassportService.NORMAL_MAX_TRANCEIVE_LENGTH, DEFAULT_BUFFER_SIZE, true, false)
             passportService.open()
             var paceSucceeded = false;
             try {
-               val cardAccessFile = CardAccessFile(passportService.getInputStream(PassportService.EF_CARD_ACCESS))
+                val cardAccessFile = CardAccessFile(passportService.getInputStream(PassportService.EF_CARD_ACCESS))
                 for (securityInfo in cardAccessFile.securityInfos) {
                     if (securityInfo is PACEInfo) {
                         authorizeWithPACE(passportService, key, securityInfo)
@@ -116,16 +125,12 @@ class EdoAppAuthActivity : AppCompatActivity() {
             }
 
             passportService.sendSelectApplet(paceSucceeded)
-//            if (!paceSucceeded) {
-//                authorizeWithBAC(passportService, bacKey)
-//            }
             Log.i(TAG, "Accessing DG1 data")
             updateLoadingWithText(R.string.edo_nfc_dg1_started)
             val dg1 = getDataGroup1FromDocument(passportService)
             Log.i(TAG, "Accessing DG11 data")
             val dg11 = getDataGroup11FromDocument(passportService)
             showResult(dg1, dg11)
-
         }
     }
 
@@ -148,42 +153,23 @@ class EdoAppAuthActivity : AppCompatActivity() {
         updateLoadingWithText(R.string.edo_nfc_pace_started)
         //PACEKeySpec.createCANKey(can)
         val paceResult = passportService.doPACE(
-                bacKey,
-                securityInfo.objectIdentifier,
-                PACEInfo.toParameterSpec(securityInfo.parameterId),
-                null
+            bacKey,
+            securityInfo.objectIdentifier,
+            PACEInfo.toParameterSpec(securityInfo.parameterId),
+            null
         )
         Log.i(TAG, "PACE successful $paceResult")
         updateLoadingWithText(R.string.edo_nfc_dg1_started)
     }
 
-//    private fun authorizeWithBAC(passportService: PassportService, bacKey: BACKeySpec) {
-//        try {
-//            passportService.doBAC(bacKey)
-//        } catch (e: Exception) {
-//            Log.w(TAG, e)
-//            disableLoadingView()
-//            CoroutineScope(Dispatchers.Main).launch {
-//                Toast.makeText(this@EdoAppAuthActivity, R.string.edo_nfc_error_bac, Toast.LENGTH_LONG).show()
-//                NavUtils.navigateUpFromSameTask(this@EdoAppAuthActivity)
-//
-//            }
-//        }
-//    }
-
     private fun showResult(dg1: DG1File, dg11: DG11File) {
         val mrzInfo = dg1.mrzInfo
         disableLoadingView()
         Log.i(TAG, "MRZInfo: $mrzInfo")
-        Log.i(TAG, "Primary " + mrzInfo.primaryIdentifier)
-        Log.i(TAG, "Secondary " + mrzInfo.secondaryIdentifier)
-        Log.i(TAG, "BirthDate " + mrzInfo.dateOfBirth)
-        Log.i(TAG, "Nationality " + mrzInfo.nationality)
-        Log.i(TAG, "ISS " + mrzInfo.issuingState)
         //todo dodać zdjęcie
 
         CoroutineScope(Dispatchers.Main).launch {
-            Toast.makeText(this@EdoAppAuthActivity, getString(R.string.edo_download_complete_toast), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@EdoAuthActivity, getString(R.string.edo_download_complete_toast), Toast.LENGTH_SHORT).show()
             val resultIntent = Intent(baseContext, EdoResultActivity::class.java)
             resultIntent.putExtra(getString(R.string.intent_first_name), mrzInfo.secondaryIdentifier.replace("<", ""))
             resultIntent.putExtra(getString(R.string.intent_last_name), mrzInfo.primaryIdentifier.replace("<", ""))
@@ -196,6 +182,32 @@ class EdoAppAuthActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun isCanFragmentVisible(): Boolean {
+        return viewPager.currentItem == 0
+    }
+
+    private fun isDocumentFragmentVisible(): Boolean {
+        return viewPager.currentItem == 1
+    }
+
+    private fun isCanDataPrepared(): Boolean {
+        return !can.isNullOrBlank()
+    }
+
+    private fun isDocumentDataPrepared(): Boolean {
+        return !documentNumber.isNullOrBlank()
+                && !expirationDate.isNullOrBlank()
+                && !birthDate.isNullOrBlank()
+    }
+
+    private fun addViewModelsListeners() {
+        canViewModel.storedCan.observe(this, Observer { this.can = it })
+        documentViewModel.storedDocumentNumber.observe(this, Observer { this.documentNumber = it })
+        documentViewModel.storedBirthDate.observe(this, Observer { this.birthDate = it })
+        documentViewModel.storedExpirationDate.observe(this, Observer { this.expirationDate = it })
+
+    }
 
     private fun enableLoadingView() {
         CoroutineScope(Dispatchers.Main).launch {
@@ -222,73 +234,4 @@ class EdoAppAuthActivity : AppCompatActivity() {
             binding.loadingImage.visibility = View.INVISIBLE
         }
     }
-
-    private fun expirationDateEditHandler(text: CharSequence?) {
-        if (!text.isNullOrBlank() && text.matches(Regex("^\\d{6}$"))) {
-            expirationDate = text.toString()
-        }
-    }
-
-    private fun dateOfBirthEditHandler(text: CharSequence?) {
-        if (!text.isNullOrBlank() && text.matches(Regex("^\\d{6}$"))) {
-            birthDate = text.toString()
-        }
-    }
-
-    private fun documentNumberEditHandler(text: CharSequence?) {
-        if (!text.isNullOrBlank()) {
-            documentNumber = text.toString()
-        }
-    }
-
-    private fun addEditTextListeners() {
-        binding.documentNumberEditText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable) {}
-            override fun beforeTextChanged(
-                s: CharSequence, start: Int,
-                count: Int, after: Int
-            ) {
-            }
-
-            override fun onTextChanged(
-                s: CharSequence, start: Int,
-                before: Int, count: Int
-            ) {
-                documentNumberEditHandler(s)
-            }
-        })
-
-        binding.dateOfBirthEditText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable) {}
-            override fun beforeTextChanged(
-                s: CharSequence, start: Int,
-                count: Int, after: Int
-            ) {
-            }
-
-            override fun onTextChanged(
-                s: CharSequence, start: Int,
-                before: Int, count: Int
-            ) {
-                dateOfBirthEditHandler(s)
-            }
-        })
-
-        binding.expirationDateEditText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable) {}
-            override fun beforeTextChanged(
-                s: CharSequence, start: Int,
-                count: Int, after: Int
-            ) {
-            }
-
-            override fun onTextChanged(
-                s: CharSequence, start: Int,
-                before: Int, count: Int
-            ) {
-                expirationDateEditHandler(s)
-            }
-        })
-    }
-
 }

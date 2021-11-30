@@ -1,56 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".EdoAppAuthActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.edo.EdoDocumentFragment">
 
     <TextView
         android:id="@+id/informationTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="44dp"
         android:gravity="center_vertical"
         android:maxLines="2"
         android:text="Wprowadź dane i przyłóż e-dowód do czytnika NFC"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ProgressBar
-        android:id="@+id/loadingImage"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="280dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="376dp"
-        android:contentDescription="loading"
-        android:progressTint="#D52A2A"
-        android:visibility="invisible"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/loadingText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="28dp"
-        android:maxLines="4"
-        android:maxWidth="280dp"
-        android:gravity="center_horizontal"
-        android:text=""
-        android:visibility="invisible"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/loadingImage" />
-
     <TextView
         android:id="@+id/documentNumberLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
         android:text="@string/edo_document_number_label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/informationTextView" />
@@ -59,7 +32,7 @@
         android:id="@+id/documentNumberEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="12dp"
         android:ems="10"
         android:inputType="textPersonName"
@@ -73,7 +46,7 @@
         android:id="@+id/dateOfBirthLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="12dp"
         android:text="@string/edo_date_of_birth_label"
         app:layout_constraintStart_toStartOf="parent"
@@ -83,7 +56,7 @@
         android:id="@+id/dateOfBirthEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="12dp"
         android:ems="10"
         android:inputType="textPersonName"
@@ -97,7 +70,7 @@
         android:id="@+id/expirationDateLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="12dp"
         android:text="@string/edo_expiration_date_label"
         app:layout_constraintStart_toStartOf="parent"
@@ -107,7 +80,7 @@
         android:id="@+id/expirationDateEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="12dp"
         android:ems="10"
         android:inputType="textPersonName"
@@ -117,15 +90,4 @@
         app:layout_constraintTop_toBottomOf="@+id/expirationDateLabel"
         tools:ignore="TextFields" />
 
-<!--    <ImageView-->
-<!--        android:id="@+id/loadingImage"-->
-<!--        android:layout_width="76dp"-->
-<!--        android:layout_height="88dp"-->
-<!--        android:layout_marginStart="164dp"-->
-<!--        android:layout_marginTop="320dp"-->
-<!--        android:contentDescription="loading"-->
-<!--        android:visibility="invisible"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:srcCompat="@android:drawable/ic_menu_rotate" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

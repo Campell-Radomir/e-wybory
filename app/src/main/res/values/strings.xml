@@ -2,6 +2,8 @@
     <string name="app_name">E Wybory</string>
     <string name="welcome_text">Witaj w aplikacji E-Wybory</string>
     <string name="choose_auth_method_text">Wybierz metode uwierzytelnienia</string>
+    <string name="choose_auth_edo_text">E-dowód</string>
+    <string name="choose_auth_passport_text">Paszport</string>
     <string name="edo_nfc_started">Rozpoczęto komunikacje NFC</string>
     <string name="edo_nfc_pace_started">Rozpoczęto uwierzytelnienie PACE</string>
     <string name="edo_nfc_dg1_started">Uwierzytelnienie pomyślne, pobieranie danych</string>
@@ -25,4 +27,10 @@
     <string name="edo_date_of_birth_label">Data urodzenia (YYMMDD)</string>
     <string name="edo_expiration_date_label">Data ważności dokumentu (YYMMDD)</string>
     <string name="edo_download_complete_toast">Możesz odłożyć e-Dowód</string>
+    <string name="title_activity_edo_app_auth_tabed">EdoAppAuthTabedActivity</string>
+    <string name="edo_tab_data">Informacje z dokumentu</string>
+    <string name="edo_tab_can">CAN</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="edo_can_label">Wprowadź CAN</string>
+    <string name="error_not_enough_data_for_authentication">Brak danych niezbędnych do odczytu E-dowodu</string>
 </resources>
