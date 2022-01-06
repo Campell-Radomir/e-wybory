@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import pl.edu.pjwstk.ewybory.R
 import pl.edu.pjwstk.ewybory.databinding.EdoCanFragmentBinding
-import pl.edu.pjwstk.ewybory.databinding.FragmentEdoAppAuthTabedBinding
 
 class EdoCanFragment : Fragment() {
 

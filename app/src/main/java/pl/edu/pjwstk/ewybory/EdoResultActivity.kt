@@ -1,8 +1,13 @@
 package pl.edu.pjwstk.ewybory
 
+import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import pl.edu.pjwstk.ewybory.databinding.ActivityEdoResultBinding
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -22,11 +27,23 @@ class EdoResultActivity : AppCompatActivity() {
         binding.birthDateText.text = formatDate(getStringOrDefault(getString(R.string.intent_birth_date)))
         binding.nationalityText.text = getStringOrDefault(getString(R.string.intent_nationality))
         binding.personalNumberText.text = getStringOrDefault(getString(R.string.intent_personal_number))
-
+        val photoArray = intent.getByteArrayExtra(getString(R.string.intent_photo))
+        if (photoArray?.size != 0) {
+            CoroutineScope(Dispatchers.IO).launch {
+                val bitmap = BitmapFactory.decodeByteArray(photoArray, 0, photoArray!!.size)
+                if (bitmap != null){
+                    binding.photoImageView.setImageBitmap(bitmap)
+                }
+            }
+        }
     }
 
     private fun formatDate(date: String): CharSequence? {
-        return SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(SimpleDateFormat("yyyyMMdd", Locale.getDefault()).parse(date))
+        try {
+            return SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(SimpleDateFormat("yyyyMMdd", Locale.getDefault()).parse(date))
+        } catch (parseE: ParseException) {
+            return SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(SimpleDateFormat("yyMMdd", Locale.getDefault()).parse(date))
+        }
     }
 
     private fun getStringOrDefault(extraName: String): String {

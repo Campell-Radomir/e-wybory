@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NavUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,7 +32,7 @@ import java.security.Security
 
 class PassportAuthActivity : AppCompatActivity() {
 
-    private val NFC_TIMEOUT = 10 * 1000
+    private val NFC_TIMEOUT = 20 * 1000
 
     private val TAG: String = PassportAuthActivity::class.java.simpleName
     private lateinit var nfcAdapter: NfcAdapter
@@ -82,7 +83,7 @@ class PassportAuthActivity : AppCompatActivity() {
                 enableLoadingView()
                 readDocument(IsoDep.get(tag), bacKey)
             } else {
-                Toast.makeText(this, "Brak danych niezbędnych do odczytu E-dowodu", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Brak danych niezbędnych do odczytu Paszportu", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -105,20 +106,23 @@ class PassportAuthActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 Log.w(TAG, e)
-                updateLoadingWithText(R.string.edo_nfc_error_pace)
-                return@launch
+                updateLoadingWithText(R.string.passport_nfc_bac_started)
             }
 
             passportService.sendSelectApplet(paceSucceeded)
-//            if (!paceSucceeded) {
-//                authorizeWithBAC(passportService, bacKey)
-//            }
+            if (!paceSucceeded && key is BACKey) {
+                authorizeWithBAC(passportService, key)
+            }
             Log.i(TAG, "Accessing DG1 data")
             updateLoadingWithText(R.string.edo_nfc_dg1_started)
             val dg1 = getDataGroup1FromDocument(passportService)
+//            Log.i(TAG, "Accessing DG11 data")
+//            val dg11 = getDataGroup11FromDocument(passportService)
+            Log.i(TAG, "Accessing DG2 data")
+            val dg2 = getDataGroup2FromDocument(passportService)
             Log.i(TAG, "Accessing DG11 data")
             val dg11 = getDataGroup11FromDocument(passportService)
-            showResult(dg1, dg11)
+            showResult(dg1, dg2,dg11)
 
         }
     }
@@ -128,14 +132,24 @@ class PassportAuthActivity : AppCompatActivity() {
         return DG1File(dataGroup)
     }
 
-    private fun getDataGroup2FromDocument(passportService: PassportService): DG2File {
-        val dataGroup = passportService.getInputStream(PassportService.EF_DG2)
-        return DG2File(dataGroup)
+    private fun getDataGroup2FromDocument(passportService: PassportService): DG2File? {
+        return try {
+            val dataGroup = passportService.getInputStream(PassportService.EF_DG2)
+            DG2File(dataGroup)
+        } catch (e: java.lang.Exception) {
+            Log.e(TAG, "Error on accessing DataGroup 2 $e")
+            null;
+        }
     }
 
-    private fun getDataGroup11FromDocument(passportService: PassportService): DG11File {
-        val dataGroup = passportService.getInputStream(PassportService.EF_DG11)
-        return DG11File(dataGroup)
+    private fun getDataGroup11FromDocument(passportService: PassportService): DG11File? {
+        return try {
+            val dataGroup = passportService.getInputStream(PassportService.EF_DG11)
+            DG11File(dataGroup)
+        }  catch (e: java.lang.Exception) {
+            Log.e(TAG, "Error on accessing DataGroup 11 $e")
+            null;
+        }
     }
 
     private fun authorizeWithPACE(passportService: PassportService, bacKey: AccessKeySpec, securityInfo: PACEInfo) {
@@ -151,21 +165,21 @@ class PassportAuthActivity : AppCompatActivity() {
         updateLoadingWithText(R.string.edo_nfc_dg1_started)
     }
 
-//    private fun authorizeWithBAC(passportService: PassportService, bacKey: BACKeySpec) {
-//        try {
-//            passportService.doBAC(bacKey)
-//        } catch (e: Exception) {
-//            Log.w(TAG, e)
-//            disableLoadingView()
-//            CoroutineScope(Dispatchers.Main).launch {
-//                Toast.makeText(this@PassportAuthActivity, R.string.edo_nfc_error_bac, Toast.LENGTH_LONG).show()
-//                NavUtils.navigateUpFromSameTask(this@PassportAuthActivity)
-//
-//            }
-//        }
-//    }
+    private fun authorizeWithBAC(passportService: PassportService, bacKey: BACKeySpec) {
+        try {
+            passportService.doBAC(bacKey)
+        } catch (e: Exception) {
+            Log.w(TAG, e)
+            disableLoadingView()
+            CoroutineScope(Dispatchers.Main).launch {
+                Toast.makeText(this@PassportAuthActivity, R.string.edo_nfc_error_bac, Toast.LENGTH_LONG).show()
+                NavUtils.navigateUpFromSameTask(this@PassportAuthActivity)
+            }
+        }
+    }
 
-    private fun showResult(dg1: DG1File, dg11: DG11File) {
+    //DG 1,2,3,14
+    private fun showResult(dg1: DG1File, dg2: DG2File?, dg11: DG11File?) {
         val mrzInfo = dg1.mrzInfo
         disableLoadingView()
         Log.i(TAG, "MRZInfo: $mrzInfo")
@@ -174,17 +188,24 @@ class PassportAuthActivity : AppCompatActivity() {
         Log.i(TAG, "BirthDate " + mrzInfo.dateOfBirth)
         Log.i(TAG, "Nationality " + mrzInfo.nationality)
         Log.i(TAG, "ISS " + mrzInfo.issuingState)
-        //todo dodać zdjęcie
+        Log.i(TAG, "DG2 $dg2")
+        Log.i(TAG, "DG11 $dg11")
 
         CoroutineScope(Dispatchers.Main).launch {
             Toast.makeText(this@PassportAuthActivity, getString(R.string.edo_download_complete_toast), Toast.LENGTH_SHORT).show()
             val resultIntent = Intent(baseContext, EdoResultActivity::class.java)
             resultIntent.putExtra(getString(R.string.intent_first_name), mrzInfo.secondaryIdentifier.replace("<", ""))
             resultIntent.putExtra(getString(R.string.intent_last_name), mrzInfo.primaryIdentifier.replace("<", ""))
-            resultIntent.putExtra(getString(R.string.intent_birth_date), dg11.fullDateOfBirth.replace("<", ""))
             resultIntent.putExtra(getString(R.string.intent_nationality), mrzInfo.nationality.replace("<", ""))
             resultIntent.putExtra(getString(R.string.intent_gender), mrzInfo.gender.name)
-            resultIntent.putExtra(getString(R.string.intent_personal_number), dg11.personalNumber.replace("<", ""))
+            resultIntent.putExtra(getString(R.string.intent_personal_number), mrzInfo.personalNumber.replace("<", ""))
+            resultIntent.putExtra(getString(R.string.intent_birth_date), mrzInfo.dateOfBirth.replace("<", ""))
+            if (dg2 != null && dg2?.faceInfos?.size != 0 && dg2?.faceInfos?.get(0)?.faceImageInfos?.size != 0) {
+                resultIntent.putExtra(getString(R.string.intent_photo),dg2!!.faceInfos.get(0).faceImageInfos.get(0).imageInputStream.readBytes())
+            }
+            if (dg11 != null) {
+                resultIntent.putExtra(getString(R.string.intent_personal_number), dg11.personalNumber)
+            }
             resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             baseContext.startActivity(resultIntent)
         }

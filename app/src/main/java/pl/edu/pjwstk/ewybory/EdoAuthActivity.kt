@@ -41,7 +41,7 @@ class EdoAuthActivity : AppCompatActivity() {
     private var documentNumber = ""
     private var birthDate = ""
     private var expirationDate = ""
-    private var can = ""
+    private var can = "377883"
     private lateinit var binding: ActivityEdoAuthBinding
     private lateinit var canViewModel: EdoCanViewModel
     private lateinit var documentViewModel: EdoDocumentViewModel
@@ -128,9 +128,11 @@ class EdoAuthActivity : AppCompatActivity() {
             Log.i(TAG, "Accessing DG1 data")
             updateLoadingWithText(R.string.edo_nfc_dg1_started)
             val dg1 = getDataGroup1FromDocument(passportService)
+            Log.i(TAG, "Accessing DG2 data")
+            val dg2 = getDataGroup2FromDocument(passportService)
             Log.i(TAG, "Accessing DG11 data")
             val dg11 = getDataGroup11FromDocument(passportService)
-            showResult(dg1, dg11)
+            showResult(dg1, dg2, dg11)
         }
     }
 
@@ -162,11 +164,12 @@ class EdoAuthActivity : AppCompatActivity() {
         updateLoadingWithText(R.string.edo_nfc_dg1_started)
     }
 
-    private fun showResult(dg1: DG1File, dg11: DG11File) {
+    private fun showResult(dg1: DG1File,dg2: DG2File, dg11: DG11File) {
         val mrzInfo = dg1.mrzInfo
         disableLoadingView()
         Log.i(TAG, "MRZInfo: $mrzInfo")
         //todo dodać zdjęcie
+        //dg2.faceInfos.get(0).faceImageInfos -> byte array
 
         CoroutineScope(Dispatchers.Main).launch {
             Toast.makeText(this@EdoAuthActivity, getString(R.string.edo_download_complete_toast), Toast.LENGTH_SHORT).show()
@@ -177,6 +180,9 @@ class EdoAuthActivity : AppCompatActivity() {
             resultIntent.putExtra(getString(R.string.intent_nationality), mrzInfo.nationality.replace("<", ""))
             resultIntent.putExtra(getString(R.string.intent_gender), mrzInfo.gender.name)
             resultIntent.putExtra(getString(R.string.intent_personal_number), dg11.personalNumber.replace("<", ""))
+            if (dg2.faceInfos.isNotEmpty() && dg2.faceInfos.get(0).faceImageInfos.isNotEmpty()) {
+                resultIntent.putExtra(getString(R.string.intent_photo),dg2.faceInfos.get(0).faceImageInfos.get(0).imageInputStream.readBytes())
+            }
             resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             baseContext.startActivity(resultIntent)
         }

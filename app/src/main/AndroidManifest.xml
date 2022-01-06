@@ -16,7 +16,11 @@
         <activity
             android:name=".EdoAuthActivity"
             android:label="@string/title_activity_edo_app_auth_tabed"
-            android:theme="@style/Theme.EWybory.NoActionBar" >
+            android:theme="@style/Theme.EWybory.NoActionBar"
+            android:parentActivityName=".AuthorizationActivity">
+            <intent-filter>
+                <action android:name="android.nfc.action.TECH_DISCOVERED" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".EdoResultActivity"

@@ -8,6 +8,7 @@
     <string name="edo_nfc_pace_started">Rozpoczęto uwierzytelnienie PACE</string>
     <string name="edo_nfc_dg1_started">Uwierzytelnienie pomyślne, pobieranie danych</string>
     <string name="edo_nfc_dg2_started">Pobieranie zdjęcia</string>
+    <string name="passport_nfc_bac_started">Rozpoczynam uwierzytelnienie BAC, po nieudanej próbie PACE</string>
     <string name="edo_nfc_error_pace">Błąd podczas uwierzytelnienia PACE, kończę proces</string>
     <string name="edo_nfc_error_bac">Błąd podczas uwierzytelnienia BAC, kończę proces</string>
     <string name="result_first_name_label">Imię</string>
@@ -24,6 +25,7 @@
     <string name="intent_birth_date">BirthDate</string>
     <string name="result_empty_data_text">Brak danych</string>
     <string name="edo_document_number_label">Numer dowodu</string>
+    <string name="passport_document_number_label">Numer dokumentu</string>
     <string name="edo_date_of_birth_label">Data urodzenia (YYMMDD)</string>
     <string name="edo_expiration_date_label">Data ważności dokumentu (YYMMDD)</string>
     <string name="edo_download_complete_toast">Możesz odłożyć e-Dowód</string>
@@ -33,4 +35,5 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="edo_can_label">Wprowadź CAN</string>
     <string name="error_not_enough_data_for_authentication">Brak danych niezbędnych do odczytu E-dowodu</string>
+    <string name="intent_photo">Photo</string>
 </resources>
