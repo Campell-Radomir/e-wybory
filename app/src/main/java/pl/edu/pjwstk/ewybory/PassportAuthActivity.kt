@@ -36,9 +36,7 @@ class PassportAuthActivity : AppCompatActivity() {
 
     private val TAG: String = PassportAuthActivity::class.java.simpleName
     private lateinit var nfcAdapter: NfcAdapter
-    private var documentNumber = ""
-    private var birthDate = ""
-    private var expirationDate = ""
+    private var documentKey = DocumentKey()
     private lateinit var binding: ActivityPassportAuthBinding;
 
 
@@ -74,11 +72,8 @@ class PassportAuthActivity : AppCompatActivity() {
     private fun handleNfcIntent(intent: Intent) {
         val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
         if (tag?.techList?.contains("android.nfc.tech.IsoDep")!!) {
-            if (!documentNumber.isNullOrBlank()
-                    && !expirationDate.isNullOrBlank()
-                    && !birthDate.isNullOrBlank()
-            ) {
-                val bacKey: BACKeySpec = BACKey(documentNumber, birthDate, expirationDate)
+            if (documentKey.isPrepared()) {
+                val bacKey: BACKeySpec = documentKey.createBACKey()
                 Log.i(TAG, "Creating BACKey $bacKey")
                 enableLoadingView()
                 readDocument(IsoDep.get(tag), bacKey)
@@ -116,8 +111,6 @@ class PassportAuthActivity : AppCompatActivity() {
             Log.i(TAG, "Accessing DG1 data")
             updateLoadingWithText(R.string.edo_nfc_dg1_started)
             val dg1 = getDataGroup1FromDocument(passportService)
-//            Log.i(TAG, "Accessing DG11 data")
-//            val dg11 = getDataGroup11FromDocument(passportService)
             Log.i(TAG, "Accessing DG2 data")
             val dg2 = getDataGroup2FromDocument(passportService)
             Log.i(TAG, "Accessing DG11 data")
@@ -240,19 +233,19 @@ class PassportAuthActivity : AppCompatActivity() {
 
     private fun expirationDateEditHandler(text: CharSequence?) {
         if (!text.isNullOrBlank() && text.matches(Regex("^\\d{6}$"))) {
-            expirationDate = text.toString()
+            documentKey.setExpirationDate(text.toString())
         }
     }
 
     private fun dateOfBirthEditHandler(text: CharSequence?) {
         if (!text.isNullOrBlank() && text.matches(Regex("^\\d{6}$"))) {
-            birthDate = text.toString()
+            documentKey.setBirthDate(text.toString())
         }
     }
 
     private fun documentNumberEditHandler(text: CharSequence?) {
         if (!text.isNullOrBlank()) {
-            documentNumber = text.toString()
+            documentKey.setDocumentNumber(text.toString())
         }
     }
 

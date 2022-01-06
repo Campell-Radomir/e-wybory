@@ -36,11 +36,9 @@ class EdoAuthActivity : AppCompatActivity() {
 
     private val NFC_TIMEOUT = 10 * 1000
 
-    private val TAG: String = PassportAuthActivity::class.java.simpleName
+    private val TAG: String = EdoAuthActivity::class.java.simpleName
     private lateinit var nfcAdapter: NfcAdapter
-    private var documentNumber = ""
-    private var birthDate = ""
-    private var expirationDate = ""
+    private var documentKey = DocumentKey()
     private var can = ""
     private lateinit var binding: ActivityEdoAuthBinding
     private lateinit var canViewModel: EdoCanViewModel
@@ -88,7 +86,7 @@ class EdoAuthActivity : AppCompatActivity() {
         if (tag?.techList?.contains("android.nfc.tech.IsoDep")!!) {
             if (isDocumentFragmentVisible() && isDocumentDataPrepared()
             ) {
-                val bacKey: BACKeySpec = BACKey(documentNumber, birthDate, expirationDate)
+                val bacKey: BACKeySpec = documentKey.createBACKey()
                 Log.i(TAG, "Creating BACKey $bacKey")
                 enableLoadingView()
                 readDocument(IsoDep.get(tag), bacKey)
@@ -202,16 +200,14 @@ class EdoAuthActivity : AppCompatActivity() {
     }
 
     private fun isDocumentDataPrepared(): Boolean {
-        return !documentNumber.isNullOrBlank()
-                && !expirationDate.isNullOrBlank()
-                && !birthDate.isNullOrBlank()
+        return documentKey.isPrepared()
     }
 
     private fun addViewModelsListeners() {
         canViewModel.storedCan.observe(this, Observer { this.can = it })
-        documentViewModel.storedDocumentNumber.observe(this, Observer { this.documentNumber = it })
-        documentViewModel.storedBirthDate.observe(this, Observer { this.birthDate = it })
-        documentViewModel.storedExpirationDate.observe(this, Observer { this.expirationDate = it })
+        documentViewModel.storedDocumentNumber.observe(this, Observer { this.documentKey.setDocumentNumber(it) })
+        documentViewModel.storedBirthDate.observe(this, Observer { this.documentKey.setBirthDate(it) })
+        documentViewModel.storedExpirationDate.observe(this, Observer { this.documentKey.setExpirationDate(it) })
 
     }
 
