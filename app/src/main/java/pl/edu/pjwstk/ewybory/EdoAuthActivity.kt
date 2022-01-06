@@ -41,7 +41,7 @@ class EdoAuthActivity : AppCompatActivity() {
     private var documentNumber = ""
     private var birthDate = ""
     private var expirationDate = ""
-    private var can = "377883"
+    private var can = ""
     private lateinit var binding: ActivityEdoAuthBinding
     private lateinit var canViewModel: EdoCanViewModel
     private lateinit var documentViewModel: EdoDocumentViewModel
