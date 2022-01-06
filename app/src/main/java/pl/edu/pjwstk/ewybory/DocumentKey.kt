@@ -21,9 +21,9 @@ class DocumentKey {
     }
 
     fun isPrepared(): Boolean {
-        return !documentNumber.isNullOrBlank()
-                && !expirationDate.isNullOrBlank()
-                && !birthDate.isNullOrBlank()
+        return documentNumber.isNotBlank()
+                && expirationDate.isNotBlank()
+                && birthDate.isNotBlank()
     }
 
     fun createBACKey(): BACKey {

@@ -39,7 +39,7 @@ class EdoAuthActivity : AppCompatActivity() {
     private val TAG: String = EdoAuthActivity::class.java.simpleName
     private lateinit var nfcAdapter: NfcAdapter
     private var documentKey = DocumentKey()
-    private var can = ""
+    private var canKey = CANKey();
     private lateinit var binding: ActivityEdoAuthBinding
     private lateinit var canViewModel: EdoCanViewModel
     private lateinit var documentViewModel: EdoDocumentViewModel
@@ -84,14 +84,13 @@ class EdoAuthActivity : AppCompatActivity() {
     private fun handleNfcIntent(intent: Intent) {
         val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
         if (tag?.techList?.contains("android.nfc.tech.IsoDep")!!) {
-            if (isDocumentFragmentVisible() && isDocumentDataPrepared()
-            ) {
+            if (isDocumentFragmentVisible() && documentKey.isPrepared()) {
                 val bacKey: BACKeySpec = documentKey.createBACKey()
                 Log.i(TAG, "Creating BACKey $bacKey")
                 enableLoadingView()
                 readDocument(IsoDep.get(tag), bacKey)
-            } else if(isCanFragmentVisible() && isCanDataPrepared()) {
-                val canKey = PACEKeySpec.createCANKey(can)
+            } else if(isCanFragmentVisible() && canKey.isPrepared()) {
+                val canKey = canKey.createPACEKey()
                 Log.i(TAG, "Creating PACE Can key $canKey")
                 enableLoadingView()
                 readDocument(IsoDep.get(tag), canKey)
@@ -195,16 +194,8 @@ class EdoAuthActivity : AppCompatActivity() {
         return viewPager.currentItem == 1
     }
 
-    private fun isCanDataPrepared(): Boolean {
-        return !can.isNullOrBlank()
-    }
-
-    private fun isDocumentDataPrepared(): Boolean {
-        return documentKey.isPrepared()
-    }
-
     private fun addViewModelsListeners() {
-        canViewModel.storedCan.observe(this, Observer { this.can = it })
+        canViewModel.storedCan.observe(this, Observer { this.canKey.setCAN(it) })
         documentViewModel.storedDocumentNumber.observe(this, Observer { this.documentKey.setDocumentNumber(it) })
         documentViewModel.storedBirthDate.observe(this, Observer { this.documentKey.setBirthDate(it) })
         documentViewModel.storedExpirationDate.observe(this, Observer { this.documentKey.setExpirationDate(it) })
