@@ -1,8 +1,10 @@
 package pl.edu.pjwstk.ewybory
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.gemalto.jp2.JP2Decoder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,12 +32,16 @@ class EdoResultActivity : AppCompatActivity() {
         val photoArray = intent.getByteArrayExtra(getString(R.string.intent_photo))
         if (photoArray?.size != 0) {
             CoroutineScope(Dispatchers.IO).launch {
-                val bitmap = BitmapFactory.decodeByteArray(photoArray, 0, photoArray!!.size)
-                if (bitmap != null){
+                val bitmap = if (JP2Decoder.isJPEG2000(photoArray)) decodeJPEG2000(photoArray!!) else BitmapFactory.decodeByteArray(photoArray, 0, photoArray!!.size)
+                if (bitmap != null) {
                     binding.photoImageView.setImageBitmap(bitmap)
                 }
             }
         }
+    }
+
+    private fun decodeJPEG2000(photoArray: ByteArray): Bitmap? {
+        return JP2Decoder(photoArray).decode()
     }
 
     private fun formatDate(date: String): CharSequence? {

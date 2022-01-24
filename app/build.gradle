@@ -52,4 +52,5 @@ dependencies {
     implementation 'org.jmrtd:jmrtd:0.7.18'
     implementation 'com.madgag.spongycastle:prov:1.58.0.0'
     implementation 'net.sf.scuba:scuba-sc-android:0.0.20';
+    implementation 'com.gemalto.jp2:jp2-android:1.0.3'
 }
