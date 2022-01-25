@@ -30,7 +30,7 @@ class EdoResultActivity : AppCompatActivity() {
         binding.nationalityText.text = getStringOrDefault(getString(R.string.intent_nationality))
         binding.personalNumberText.text = getStringOrDefault(getString(R.string.intent_personal_number))
         val photoArray = intent.getByteArrayExtra(getString(R.string.intent_photo))
-        if (photoArray?.size != 0) {
+        if (photoArray != null && photoArray?.size != 0) {
             CoroutineScope(Dispatchers.IO).launch {
                 val bitmap = if (JP2Decoder.isJPEG2000(photoArray)) decodeJPEG2000(photoArray!!) else BitmapFactory.decodeByteArray(photoArray, 0, photoArray!!.size)
                 if (bitmap != null) {
