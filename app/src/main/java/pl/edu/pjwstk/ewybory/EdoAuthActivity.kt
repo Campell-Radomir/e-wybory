@@ -165,8 +165,6 @@ class EdoAuthActivity : AppCompatActivity() {
         val mrzInfo = dg1.mrzInfo
         disableLoadingView()
         Log.i(TAG, "MRZInfo: $mrzInfo")
-        //todo dodać zdjęcie
-        //dg2.faceInfos.get(0).faceImageInfos -> byte array
 
         CoroutineScope(Dispatchers.Main).launch {
             Toast.makeText(this@EdoAuthActivity, getString(R.string.edo_download_complete_toast), Toast.LENGTH_SHORT).show()
@@ -177,8 +175,8 @@ class EdoAuthActivity : AppCompatActivity() {
             resultIntent.putExtra(getString(R.string.intent_nationality), mrzInfo.nationality.replace("<", ""))
             resultIntent.putExtra(getString(R.string.intent_gender), mrzInfo.gender.name)
             resultIntent.putExtra(getString(R.string.intent_personal_number), dg11.personalNumber.replace("<", ""))
-            if (dg2.faceInfos.isNotEmpty() && dg2.faceInfos.get(0).faceImageInfos.isNotEmpty()) {
-                resultIntent.putExtra(getString(R.string.intent_photo),dg2.faceInfos.get(0).faceImageInfos.get(0).imageInputStream.readBytes())
+            if (dg2?.faceInfos?.get(0)?.faceImageInfos?.size ?: 0 != 0) {
+                resultIntent.putExtra(getString(R.string.intent_photo),dg2.faceInfos?.get(0)?.faceImageInfos?.get(0)?.imageInputStream?.readBytes())
             }
             resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             baseContext.startActivity(resultIntent)

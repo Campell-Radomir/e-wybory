@@ -193,8 +193,8 @@ class PassportAuthActivity : AppCompatActivity() {
             resultIntent.putExtra(getString(R.string.intent_gender), mrzInfo.gender.name)
             resultIntent.putExtra(getString(R.string.intent_personal_number), mrzInfo.personalNumber.replace("<", ""))
             resultIntent.putExtra(getString(R.string.intent_birth_date), mrzInfo.dateOfBirth.replace("<", ""))
-            if (dg2 != null && dg2?.faceInfos?.size != 0 && dg2?.faceInfos?.get(0)?.faceImageInfos?.size != 0) {
-                resultIntent.putExtra(getString(R.string.intent_photo),dg2!!.faceInfos.get(0).faceImageInfos.get(0).imageInputStream.readBytes())
+            if (dg2?.faceInfos?.get(0)?.faceImageInfos?.size ?: 0 != 0) {
+                resultIntent.putExtra(getString(R.string.intent_photo),dg2?.faceInfos?.get(0)?.faceImageInfos?.get(0)?.imageInputStream?.readBytes())
             }
             if (dg11 != null) {
                 resultIntent.putExtra(getString(R.string.intent_personal_number), dg11.personalNumber)

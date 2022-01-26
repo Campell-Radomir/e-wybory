@@ -30,9 +30,9 @@ class EdoResultActivity : AppCompatActivity() {
         binding.nationalityText.text = getStringOrDefault(getString(R.string.intent_nationality))
         binding.personalNumberText.text = getStringOrDefault(getString(R.string.intent_personal_number))
         val photoArray = intent.getByteArrayExtra(getString(R.string.intent_photo))
-        if (photoArray != null && photoArray?.size != 0) {
+        if (photoArray?.size ?: 0 != 0) {
             CoroutineScope(Dispatchers.IO).launch {
-                val bitmap = if (JP2Decoder.isJPEG2000(photoArray)) decodeJPEG2000(photoArray!!) else BitmapFactory.decodeByteArray(photoArray, 0, photoArray!!.size)
+                val bitmap = if (JP2Decoder.isJPEG2000(photoArray)) decodeJPEG2000(photoArray) else BitmapFactory.decodeByteArray(photoArray, 0, photoArray?.size ?: 0)
                 if (bitmap != null) {
                     binding.photoImageView.setImageBitmap(bitmap)
                 }
@@ -40,15 +40,15 @@ class EdoResultActivity : AppCompatActivity() {
         }
     }
 
-    private fun decodeJPEG2000(photoArray: ByteArray): Bitmap? {
+    private fun decodeJPEG2000(photoArray: ByteArray?): Bitmap? {
         return JP2Decoder(photoArray).decode()
     }
 
     private fun formatDate(date: String): CharSequence? {
-        try {
-            return SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(SimpleDateFormat("yyyyMMdd", Locale.getDefault()).parse(date))
+        return try {
+            SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(SimpleDateFormat("yyyyMMdd", Locale.getDefault()).parse(date))
         } catch (parseE: ParseException) {
-            return SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(SimpleDateFormat("yyMMdd", Locale.getDefault()).parse(date))
+            SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(SimpleDateFormat("yyMMdd", Locale.getDefault()).parse(date))
         }
     }
 
