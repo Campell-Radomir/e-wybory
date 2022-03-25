@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_theme"
+        android:title="Tryb">
+        <group
+            android:menuCategory="alternative">
+            <item android:id="@+id/menu_light_theme" android:title="@string/light_theme_menu_option" />
+            <item android:id="@+id/menu_dark_theme" android:title="@string/night_theme_menu_option" />
+            <item android:id="@+id/menu_system_theme" android:title="@string/system_default_theme_menu_option" />
+        </group>
+    </item>
+</menu>

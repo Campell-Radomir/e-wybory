@@ -50,7 +50,7 @@
         android:layout_marginTop="128dp"
         android:onClick="edoAppButtonClickHandler"
         android:text="@string/choose_auth_edo_text"
-        app:backgroundTint="@color/edo_app_red"
+        style="@style/EdoAppButton"
         app:layout_constraintEnd_toStartOf="@+id/spliter"
         app:layout_constraintTop_toBottomOf="@+id/ChooseAuthMethodText" />
 
@@ -62,7 +62,7 @@
         android:layout_marginTop="128dp"
         android:onClick="passportButtonClickHandler"
         android:text="@string/choose_auth_passport_text"
-        app:backgroundTint="@color/profil_zaufany_blue"
+        style="@style/PassportButton"
         app:layout_constraintStart_toEndOf="@+id/spliter"
         app:layout_constraintTop_toBottomOf="@+id/ChooseAuthMethodText" />
 

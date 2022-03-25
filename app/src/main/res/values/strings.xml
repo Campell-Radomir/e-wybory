@@ -36,4 +36,7 @@
     <string name="edo_can_label">Wprowadź CAN</string>
     <string name="error_not_enough_data_for_authentication">Brak danych niezbędnych do odczytu E-dowodu</string>
     <string name="intent_photo">Photo</string>
+    <string name="light_theme_menu_option">Jasny</string>
+    <string name="night_theme_menu_option">Ciemny</string>
+    <string name="system_default_theme_menu_option">Systemowy</string>
 </resources>

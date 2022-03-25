@@ -9,5 +9,19 @@
     <color name="white">#FFFFFFFF</color>
     <color name="tango">#870121</color>
     <color name="edo_app_red">#c81224</color>
+    <color name="edo_app_red_dark_theme">#ff544d</color>
     <color name="profil_zaufany_blue">#00255e</color>
+    <color name="profil_zaufany_blue_dark_theme">#00a2d8</color>
+    <color name="red_primary">#c81224</color>
+    <color name="red_primary_light">#ff544d</color>
+    <color name="red_primary_dark">#8f0000</color>
+    <color name="blue_secondary">#00a2d8</color>
+    <color name="blue_secondary_light">#60d3ff</color>
+    <color name="blue_secondary_dark">#0073a6</color>
+    <color name="black_primary">#121212</color>
+    <color name="black_primary_light">#383838</color>
+    <color name="black_primary_dark">#000</color>
+    <color name="red_secondary">#ef534e</color>
+    <color name="red_secondary_light">#ff867a</color>
+    <color name="red_secondary_dark">#b61825</color>
 </resources>
