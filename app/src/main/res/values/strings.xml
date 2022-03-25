@@ -39,4 +39,6 @@
     <string name="light_theme_menu_option">Jasny</string>
     <string name="night_theme_menu_option">Ciemny</string>
     <string name="system_default_theme_menu_option">Systemowy</string>
+    <string name="enter_data_and_touch_nfc_with_eid">Wprowadź dane i przyłóż e-dowód do czytnika NFC</string>
+    <string name="enter_data_and_touch_nfc_with_epassport">Wprowadź dane i przyłóż paszport do czytnika NFC</string>
 </resources>

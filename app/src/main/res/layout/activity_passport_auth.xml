@@ -14,7 +14,7 @@
         android:layout_marginTop="30dp"
         android:gravity="center_vertical"
         android:maxLines="2"
-        android:text="Wprowadź dane i przyłóż e-dowód do czytnika NFC"
+        android:text="@string/enter_data_and_touch_nfc_with_epassport"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -26,7 +26,6 @@
         android:layout_marginStart="40dp"
         android:layout_marginTop="376dp"
         android:contentDescription="loading"
-        android:progressTint="#D52A2A"
         android:visibility="invisible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

@@ -13,7 +13,7 @@
         android:layout_marginTop="16dp"
         android:gravity="center_vertical"
         android:maxLines="2"
-        android:text="Wprowadź dane i przyłóż e-dowód do czytnika NFC"
+        android:text="@string/enter_data_and_touch_nfc_with_eid"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
