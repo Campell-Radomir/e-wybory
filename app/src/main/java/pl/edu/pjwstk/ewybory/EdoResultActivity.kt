@@ -28,8 +28,7 @@ class EdoResultActivity : AppCompatActivity() {
         binding.lastNameText.text = getStringOrDefault(getString(R.string.intent_last_name))
         binding.birthDateText.text = formatDate(getStringOrDefault(getString(R.string.intent_birth_date)))
         binding.nationalityText.text = getStringOrDefault(getString(R.string.intent_nationality))
-//        binding.personalNumberText.text = getStringOrDefault(getString(R.string.intent_personal_number))
-        binding.personalNumberText.text = "96112700000"
+        binding.personalNumberText.text = getStringOrDefault(getString(R.string.intent_personal_number))
         val photoArray = intent.getByteArrayExtra(getString(R.string.intent_photo))
         if (photoArray?.size ?: 0 != 0) {
             CoroutineScope(Dispatchers.IO).launch {
