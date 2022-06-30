@@ -150,7 +150,6 @@ class EdoAuthActivity : AppCompatActivity() {
 
     private fun authorizeWithPACE(passportService: PassportService, bacKey: AccessKeySpec, securityInfo: PACEInfo) {
         updateLoadingWithText(R.string.edo_nfc_pace_started)
-        //PACEKeySpec.createCANKey(can)
         val paceResult = passportService.doPACE(
             bacKey,
             securityInfo.objectIdentifier,
